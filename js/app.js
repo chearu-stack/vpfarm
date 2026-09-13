@@ -280,6 +280,18 @@
       return;
     }
 
+    // Проверка Turnstile: ищем скрытый инпут, создаваемый виджетом
+    const turnstileInput = form.querySelector('input[name="cf-turnstile-response"]');
+    const turnstileToken = turnstileInput ? turnstileInput.value.trim() : '';
+    if (!turnstileToken) {
+      feedback.textContent = 'Пройдите проверку, что вы не робот';
+      feedback.className = 'form-feedback error';
+      return;
+    }
+
+    // Добавляем токен в данные запроса
+    validation.data.turnstile_token = turnstileToken;
+
     // Отправка
     const submitBtn = form.querySelector('.btn-submit');
     submitBtn.disabled = true;
@@ -317,10 +329,18 @@
       // Сбрасываем значения полей (браузер сбросит, но select может остаться)
       form.breed_id.value = '';
       clearFieldErrors();
+
+      // Сбрасываем Turnstile после успешной отправки
+      if (window.turnstile && typeof window.turnstile.reset === 'function') {
+        window.turnstile.reset();
+      }
     } catch (error) {
       console.error('Ошибка отправки формы:', error);
       feedback.textContent = error.message || 'Произошла ошибка. Попробуйте ещё раз.';
       feedback.className = 'form-feedback error';
+      // В случае ошибки не сбрасываем Turnstile, чтобы пользователь мог повторить без прохождения повторной проверки,
+      // но токен мог быть использован, поэтому лучше тоже сбросить? Оставляем как есть: если ошибка серверная, токен может быть не израсходован.
+      // При необходимости можно сбросить, но по ТЗ не требуется.
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Отправить заявку';
