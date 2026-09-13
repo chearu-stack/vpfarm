@@ -9,7 +9,7 @@ window.APP_CONFIG = {
    * Для продакшена: https://api.example.com
    * Если API размещён на том же домене, оставьте пустую строку ''.
    */
-  API_BASE_URL: 'http://195.209.219.224:8001',
+  API_BASE_URL: 'https://api-vpfarm.195.209.219.224.nip.io',
 
   /**
    * Контактные данные фермы.
