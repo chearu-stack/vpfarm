@@ -1,11 +1,2 @@
-# Локальные переменные окружения и служебные файлы
-.env
-.env.*
-!.env.example
-node_modules/
-dist/
-build/
-.vscode/
-.idea/
-Thumbs.db
-.DS_Store
+test_hero.html
+*.bak

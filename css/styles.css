@@ -144,13 +144,16 @@ a:hover {
     width: 100%;
 }
 
-/* ---------- Шапка ---------- */
+/* ---------- Шапка (Тонированное стекло, фиксированная) ---------- */
 .site-header {
-    background-color: var(--color-surface);
-    box-shadow: var(--shadow-sm);
-    position: sticky;
+    background-color: rgba(0, 0, 0, 0.45); /* Темная полупрозрачная база */
+    backdrop-filter: blur(12px); /* Эффект стекла */
+    -webkit-backdrop-filter: blur(12px);
+    position: fixed; /* Шапка всегда на экране */
     top: 0;
-    z-index: 100;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
     height: auto;
     min-height: var(--header-height);
 }
@@ -165,8 +168,10 @@ a:hover {
 .logo {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--color-primary);
-    letter-spacing: -0.5px;
+    color: #ffffff;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
 
 .logo-main {
@@ -195,26 +200,27 @@ a:hover {
 }
 
 .nav-toggle:hover {
-    background-color: var(--color-primary-light);
+    background-color: rgba(255, 255, 255, 0.15);
 }
 
 .nav-toggle span {
     display: block;
     width: 24px;
     height: 2px;
-    background-color: var(--color-primary);
+    background-color: #ffffff;
     margin: 2px 0;
     transition: var(--transition);
     transform-origin: center;
 }
 
 .nav-list {
-    display: none; /* скрыто на мобильных по умолчанию */
+    display: none;
     position: absolute;
     top: var(--header-height);
     left: 0;
     right: 0;
-    background-color: var(--color-surface);
+    background-color: rgba(0, 0, 0, 0.85); 
+    backdrop-filter: blur(10px);
     box-shadow: var(--shadow-md);
     padding: 16px;
     flex-direction: column;
@@ -228,18 +234,21 @@ a:hover {
 .nav-link {
     display: block;
     padding: 12px 16px;
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: var(--color-text);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #ffffff;
     border-radius: var(--radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
 
 .nav-link:hover {
-    background-color: var(--color-primary-light);
-    color: var(--color-primary-dark);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
 }
 
-/* Анимация бургера при открытом меню (по желанию) */
+/* Анимация бургера при открытом меню */
 .nav-open ~ .nav-toggle span:nth-child(1) {
     transform: translateY(6px) rotate(45deg);
 }
@@ -250,26 +259,33 @@ a:hover {
     transform: translateY(-6px) rotate(-45deg);
 }
 
-/* ---------- Главный экран ---------- */
+/* ---------- Главный экран (Cinematic Hero с фото 100vh) ---------- */
 .hero {
-    background: linear-gradient(135deg, var(--color-primary-light) 0%, #f1f8e9 100%);
-    padding: 64px 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.75) 100%),
+                url('../assets/images/hero-bg.jpg') center center / cover no-repeat;
+    padding: 80px 0 0 0; 
+    min-height: 100vh; /* Ровно на весь экран */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     text-align: center;
 }
 
 .hero-title {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: 800;
-    color: var(--color-primary-dark);
+    color: #ffffff;
     margin-bottom: 16px;
     line-height: 1.2;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
 .hero-subtitle {
     font-size: 1.125rem;
-    color: var(--color-text-light);
+    color: rgba(255, 255, 255, 0.95);
     max-width: 600px;
     margin: 0 auto 32px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
 .hero-actions {
@@ -278,6 +294,41 @@ a:hover {
     gap: 12px;
     align-items: center;
     justify-content: center;
+}
+
+/* Кнопки ТОЛЬКО для главного экрана */
+.hero-actions .btn-primary {
+    background-color: #27ae60;
+    border-color: #27ae60;
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+}
+
+.hero-actions .btn-primary:hover {
+    background-color: #219653;
+    border-color: #219653;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.6);
+    color: #ffffff;
+}
+
+.hero-actions .btn-outline {
+    background-color: transparent;
+    color: #ffffff;
+    border-color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+}
+
+.hero-actions .btn-outline:hover {
+    background-color: #ffffff;
+    color: #333333;
+    border-color: #ffffff;
+    transform: translateY(-2px);
 }
 
 /* ---------- Секции ---------- */
@@ -561,7 +612,6 @@ a:hover {
 }
 
 .social-item {
-    /* ничего не нужно, но для семантики */
 }
 
 .social-link {
@@ -624,7 +674,7 @@ a:hover {
    Адаптивные стили
    ============================================ */
 
-/* Маленькие мобильные (уже базовые, но подправим) */
+/* Маленькие мобильные */
 @media (max-width: 480px) {
     :root {
         --header-height: 56px;
@@ -641,6 +691,10 @@ a:hover {
     .btn {
         padding: 10px 20px;
         font-size: 0.95rem;
+    }
+    .hero-actions .btn {
+        width: 100%;
+        max-width: 100%;
     }
 }
 
@@ -678,11 +732,8 @@ a:hover {
     .section {
         padding: 72px 0;
     }
-    .hero {
-        padding: 96px 0;
-    }
     .hero-title {
-        font-size: 2.5rem;
+        font-size: 3rem;
     }
     .catalog-grid {
         grid-template-columns: repeat(3, 1fr);
@@ -697,18 +748,18 @@ a:hover {
         gap: 0;
         box-shadow: none;
         padding: 0;
-        background: transparent;
+        background: transparent; 
     }
     .nav-link {
         padding: 8px 16px;
-        font-size: 1rem;
+        font-size: 0.95rem;
     }
     .header-inner {
         height: var(--header-height);
     }
 }
 
-/* Большие экраны (≥ 1200px) - можно увеличить сетку каталога до 4 колонок */
+/* Большие экраны (≥ 1200px) */
 @media (min-width: 1200px) {
     .catalog-grid {
         grid-template-columns: repeat(4, 1fr);
