@@ -765,3 +765,39 @@ a:hover {
         grid-template-columns: repeat(4, 1fr);
     }
 }
+
+.stock-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 8px;
+    white-space: nowrap;
+}
+
+.stock-badge.many {
+    background-color: #2e7d32;
+    color: #ffffff;
+}
+
+.stock-badge.available {
+    background-color: #a5d6a7;
+    color: #1b5e20;
+}
+
+.stock-badge.few {
+    background-color: #ffb74d;
+    color: #5d4037;
+}
+
+.stock-badge.expected {
+    background-color: #90caf9;
+    color: #0d47a1;
+}
+
+.stock-badge.none {
+    background-color: #ef9a9a;
+    color: #b71c1c;
+}

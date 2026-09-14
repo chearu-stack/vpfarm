@@ -19,6 +19,50 @@
     return num.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
+  function getStockBadgeHtml(breed) {
+    const status = breed.stock_status;
+    let text = '';
+    let className = 'stock-badge';
+
+    switch (status) {
+      case 'many':
+        text = 'Много';
+        className += ' many';
+        break;
+      case 'available':
+        text = 'Есть в наличии';
+        className += ' available';
+        break;
+      case 'few':
+        text = 'Осталось мало';
+        className += ' few';
+        break;
+      case 'none':
+        text = 'Нет в наличии';
+        className += ' none';
+        break;
+      case 'expected':
+        if (breed.expected_date) {
+          const date = new Date(breed.expected_date);
+          if (!isNaN(date.getTime())) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            text = `Ожидается ${day}.${month}`;
+          } else {
+            text = 'Ожидается';
+          }
+        } else {
+          text = 'Ожидается';
+        }
+        className += ' expected';
+        break;
+      default:
+        return '';
+    }
+
+    return `<div class="${className}">${text}</div>`;
+  }
+
   /**
    * Нормализация телефона для отправки: приводит к формату +7XXXXXXXXXX (11 цифр).
    * Принимает значение, оставляет только цифры и знак плюса.
@@ -224,6 +268,7 @@
           </div>
           <div class="breed-info">
             <h3 class="breed-name">${escapeHtml(breed.name)}</h3>
+            ${getStockBadgeHtml(breed)}
             <p class="breed-price">${formatPrice(breed.price)} <span class="currency">₽</span></p>
             <p class="breed-description">${escapeHtml(breed.description || '')}</p>
             <button class="btn btn-primary btn-order" data-breed-id="${escapeHtml(breed.id)}">Заказать</button>
