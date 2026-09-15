@@ -21,7 +21,7 @@ window.APP_CONFIG = {
     socials: [
       {
         name: 'Макс',
-        url: 'https://max.ru/u/f9LHodD0cOJZd-9Q8KYoMG_6x2MsqIF-xuh6TjzbUAySh0TSMwcyT7ioMcc',
+        url: 'https://max.ru/u/f9LHodD0cOIGO2FYwXg9t-Vf9kuARQAB06xxMJi8EsMTbglziXgs4oqoqTY',
         icon: '🗨️'
       },
       {
