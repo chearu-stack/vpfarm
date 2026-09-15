@@ -20,47 +20,29 @@
   }
 
   function getStockBadgeHtml(breed) {
-    const status = breed.stock_status;
-    let text = '';
-    let className = 'stock-badge';
+    const getStatusBadge = (status, prefix = '') => {
+      const labels = {
+        many: 'Много',
+        available: 'Есть в наличии',
+        few: 'Осталось мало'
+      };
+      if (!labels[status]) return '';
+      return `<div class="stock-badge ${status}">${prefix}${labels[status]}</div>`;
+    };
 
-    switch (status) {
-      case 'many':
-        text = 'Много';
-        className += ' many';
-        break;
-      case 'available':
-        text = 'Есть в наличии';
-        className += ' available';
-        break;
-      case 'few':
-        text = 'Осталось мало';
-        className += ' few';
-        break;
-      case 'none':
-        text = 'Нет в наличии';
-        className += ' none';
-        break;
-      case 'expected':
-        if (breed.expected_date) {
-          const date = new Date(breed.expected_date);
-          if (!isNaN(date.getTime())) {
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            text = `Ожидается ${day}.${month}`;
-          } else {
-            text = 'Ожидается';
-          }
-        } else {
-          text = 'Ожидается';
-        }
-        className += ' expected';
-        break;
-      default:
-        return '';
+    const youngBadge = getStatusBadge(breed.young_status);
+    const grownBadge = getStatusBadge(breed.grown_status, 'Подрощенные: ');
+    if (youngBadge || grownBadge) return youngBadge + grownBadge;
+
+    if (breed.expected_date) {
+      const date = new Date(breed.expected_date);
+      if (!isNaN(date.getTime())) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        return `<div class="stock-badge expected">Ожидается ${day}.${month}</div>`;
+      }
     }
-
-    return `<div class="${className}">${text}</div>`;
+    return '';
   }
 
   /**
