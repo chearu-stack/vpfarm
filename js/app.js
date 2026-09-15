@@ -101,6 +101,7 @@
     const phoneRaw = form.phone.value.trim();
     const breed = form.breed_id.value;
     const quantity = form.quantity.value.trim();
+    const consent = form.consent.checked;
 
     const errors = {};
 
@@ -121,6 +122,10 @@
     const quantityNum = Number(quantity);
     if (!quantity || isNaN(quantityNum) || !Number.isInteger(quantityNum) || quantityNum < 1 || quantityNum > 10000) {
       errors.quantity = 'Введите целое число от 1 до 10000.';
+    }
+
+    if (!consent) {
+      errors.consent = 'Необходимо согласиться с Политикой конфиденциальности.';
     }
 
     const phoneNormalized = normalizePhone(phoneRaw);
@@ -152,7 +157,7 @@
   }
 
   function clearFieldErrors() {
-    const errorIds = ['name-error', 'phone-error', 'breed-error', 'quantity-error'];
+    const errorIds = ['name-error', 'phone-error', 'breed-error', 'quantity-error', 'consent-error'];
     errorIds.forEach(id => {
       const el = document.getElementById(id);
       if (el) {
@@ -160,7 +165,7 @@
         el.classList.remove('visible');
       }
     });
-    ['name', 'phone', 'breed', 'quantity'].forEach(id => {
+    ['name', 'phone', 'breed', 'quantity', 'consent'].forEach(id => {
       const field = document.getElementById(id);
       if (field) field.removeAttribute('aria-invalid');
     });
@@ -320,6 +325,7 @@
       if (errors.phone) showFieldError('phone', 'phone-error', errors.phone);
       if (errors.breed) showFieldError('breed', 'breed-error', errors.breed);
       if (errors.quantity) showFieldError('quantity', 'quantity-error', errors.quantity);
+      if (errors.consent) showFieldError('consent', 'consent-error', errors.consent);
       feedback.textContent = 'Пожалуйста, исправьте ошибки в форме.';
       feedback.className = 'form-feedback error';
       return;
@@ -387,7 +393,7 @@
       // но токен мог быть использован, поэтому лучше тоже сбросить? Оставляем как есть: если ошибка серверная, токен может быть не израсходован.
       // При необходимости можно сбросить, но по ТЗ не требуется.
     } finally {
-      submitBtn.disabled = false;
+      submitBtn.disabled = !document.getElementById('consent').checked;
       submitBtn.textContent = 'Отправить заявку';
     }
   }
@@ -442,11 +448,44 @@
     });
   }
 
+  function initPrivacyAndConsent() {
+    const consent = document.getElementById('consent');
+    const submitButton = document.querySelector('.btn-submit');
+    const modal = document.getElementById('privacy-modal');
+    const openLink = document.getElementById('privacy-policy-link');
+    const closeButton = document.getElementById('privacy-modal-close');
+    if (!consent || !submitButton || !modal || !openLink || !closeButton) return;
+
+    const updateSubmitState = () => {
+      submitButton.disabled = !consent.checked;
+    };
+    const closeModal = () => {
+      modal.hidden = true;
+    };
+    const openModal = (event) => {
+      event.preventDefault();
+      modal.hidden = false;
+      closeButton.focus();
+    };
+
+    consent.addEventListener('change', updateSubmitState);
+    openLink.addEventListener('click', openModal);
+    closeButton.addEventListener('click', closeModal);
+    modal.addEventListener('click', event => {
+      if (event.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !modal.hidden) closeModal();
+    });
+    updateSubmitState();
+  }
+
   // ---------- Инициализация ----------
   document.addEventListener('DOMContentLoaded', () => {
     initStaticContent();
     initMobileNav();
     initPhoneInput();
+    initPrivacyAndConsent();
 
     // Делегирование для кнопок "Заказать" в каталоге
     document.getElementById('catalog-grid').addEventListener('click', onBreedOrderClick);
