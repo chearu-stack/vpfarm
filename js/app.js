@@ -172,15 +172,19 @@
 
     // Контактные данные
     const contact = CONFIG.contact || {};
+    const footerPhone = document.getElementById('footer-phone');
+    const footerAddress = document.getElementById('footer-address');
     if (contact.phone) {
       document.getElementById('contact-phone').textContent = contact.phone;
-      document.getElementById('footer-phone').textContent = contact.phone;
       document.getElementById('contact-phone').setAttribute('href', contact.phoneHref || '#');
-      document.getElementById('footer-phone').setAttribute('href', contact.phoneHref || '#');
+      if (footerPhone) {
+        footerPhone.textContent = contact.phone;
+        footerPhone.setAttribute('href', contact.phoneHref || '#');
+      }
     }
     if (contact.address) {
       document.getElementById('contact-address').textContent = contact.address;
-      document.getElementById('footer-address').textContent = contact.address;
+      if (footerAddress) footerAddress.textContent = contact.address;
     }
     if (contact.socials && Array.isArray(contact.socials)) {
       const socialsList = document.getElementById('contact-socials');
@@ -200,7 +204,8 @@
     }
 
     // Год в футере
-    document.getElementById('current-year').textContent = new Date().getFullYear();
+    const currentYear = document.getElementById('current-year');
+    if (currentYear) currentYear.textContent = new Date().getFullYear();
   }
 
   // ---------- Каталог пород ----------

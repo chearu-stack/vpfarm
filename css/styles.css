@@ -650,6 +650,11 @@ a:hover {
     text-align: center;
 }
 
+.footer-copyright-container {
+    width: 100%;
+    text-align: center;
+}
+
 .footer-copyright {
     font-size: 0.9rem;
 }
