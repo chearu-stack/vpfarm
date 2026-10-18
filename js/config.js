@@ -16,7 +16,7 @@ window.APP_CONFIG = {
    */
   productsCatalog: {
     mode: 'permissive',
-    csvUrl: 'https://docs.google.com/spreadsheets/d/1FZnlVW5wbDOdq2KZa1uVSlQpDEojg55u/export?format=csv&gid=253877941'
+    csvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRbrNupieIhx5MCiG4phXQe-KmMb34az0q_8BjEZDO-wmtlOib4_8KwKNFUe-8CcEN-usaQKWCT_W9D/pub?gid=253877941&single=true&output=csv'
   },
 
   /**
