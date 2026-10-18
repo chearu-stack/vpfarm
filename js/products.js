@@ -16,7 +16,7 @@
         in_stock: { label: 'В наличии', button: 'Связаться по поводу товара' },
         out_of_stock: { label: 'Нет в наличии', button: 'Уточнить наличие' },
         on_order: { label: 'Под заказ', button: 'Уточнить возможность заказа' },
-        seasonal: { label: 'Сезонный товар', button: 'Уточнить сезон и наличие' },
+        seasonal: { label: 'Сезонный товар', button: 'Оставить заявку на сезон' },
         waitlist: { label: 'Лист ожидания', button: 'Уточнить лист ожидания' },
     };
     const allowedCategories = new Set(categoryOrder.map(([category]) => category));
