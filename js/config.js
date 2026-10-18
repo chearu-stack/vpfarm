@@ -12,6 +12,14 @@ window.APP_CONFIG = {
   API_BASE_URL: 'https://api-vpfarm.195.209.219.224.nip.io',
 
   /**
+   * Временный режим каталога можно вернуть к contract одной настройкой mode: 'strict'.
+   */
+  productsCatalog: {
+    mode: 'permissive',
+    csvUrl: 'https://docs.google.com/spreadsheets/d/1FZnlVW5wbDOdq2KZa1uVSlQpDEojg55u/export?format=csv&gid=253877941'
+  },
+
+  /**
    * Контактные данные фермы.
    */
   contact: {

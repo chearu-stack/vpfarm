@@ -1,0 +1,102 @@
+[
+  {
+    "id": "broiler",
+    "category": "poultry_meat",
+    "name": "Бройлер",
+    "unit": "кг",
+    "price": 380,
+    "currency": "RUB",
+    "image_url": "img/products/product-broiler.svg",
+    "status": "in_stock"
+  },
+  {
+    "id": "turkey",
+    "category": "poultry_meat",
+    "name": "Индейка",
+    "unit": "кг",
+    "price": 590,
+    "currency": "RUB",
+    "image_url": "img/products/product-turkey.svg",
+    "status": "in_stock"
+  },
+  {
+    "id": "indoutka",
+    "category": "poultry_meat",
+    "name": "Индоутка",
+    "unit": "кг",
+    "price": 540,
+    "currency": "RUB",
+    "image_url": "img/products/product-indoutka.svg",
+    "status": "in_stock"
+  },
+  {
+    "id": "geese",
+    "category": "poultry_meat",
+    "name": "Гуси",
+    "unit": "кг",
+    "price": 720,
+    "currency": "RUB",
+    "image_url": "img/products/product-geese.svg",
+    "status": "in_stock"
+  },
+  {
+    "id": "egg-chicken",
+    "category": "food_eggs",
+    "name": "Яйцо пищевое куриное",
+    "unit": "десяток",
+    "price": 160,
+    "currency": "RUB",
+    "image_url": "img/products/product-eggs-chicken.svg",
+    "status": "in_stock"
+  },
+  {
+    "id": "egg-turkey",
+    "category": "food_eggs",
+    "name": "Яйцо индейки",
+    "unit": "десяток",
+    "price": 280,
+    "currency": "RUB",
+    "image_url": "img/products/product-eggs-turkey.svg",
+    "status": "in_stock"
+  },
+  {
+    "id": "egg-goose",
+    "category": "food_eggs",
+    "name": "Яйцо гуся",
+    "unit": "десяток",
+    "price": 300,
+    "currency": "RUB",
+    "image_url": "img/products/product-eggs-goose.svg",
+    "status": "waitlist"
+  },
+  {
+    "id": "offal-mix",
+    "category": "offal",
+    "name": "Субпродукты (печень, сердца, желудки)",
+    "unit": "кг",
+    "price": 250,
+    "currency": "RUB",
+    "image_url": "img/products/product-offal.svg",
+    "status": "in_stock"
+  },
+  {
+    "id": "poultry-paws",
+    "category": "offal",
+    "name": "Лапы",
+    "unit": "кг",
+    "price": 150,
+    "currency": "RUB",
+    "image_url": "img/products/product-paws.svg",
+    "status": "in_stock"
+  },
+  {
+    "id": "poultry-stew",
+    "category": "preserves",
+    "name": "Тушёнка (мясо птицы)",
+    "unit": "банка",
+    "price": 250,
+    "currency": "RUB",
+    "image_url": "img/products/product-stew.svg",
+    "status": "in_stock"
+  }
+]

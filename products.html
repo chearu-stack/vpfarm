@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#121316">
+    <title>Продукция — Ваша Птица Ферма</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/products.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body class="theme-gastronomy">
+    <header class="site-header products-header">
+        <div class="container products-header-inner">
+            <a href="#products-top" class="logo" aria-label="Ваша Птица Ферма — к началу страницы">
+                <span class="logo-main">Ваша Птица Ферма</span>
+            </a>
+            <div class="direction-switch" aria-label="Выбор направления">
+                <a class="direction-link" href="index.html">Птенцы</a>
+                <span class="direction-divider" aria-hidden="true">|</span>
+                <a class="direction-link is-active" href="products.html" aria-current="page">Продукция</a>
+            </div>
+            <button class="products-menu-toggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="products-nav">
+                <span></span><span></span><span></span>
+            </button>
+            <nav class="products-nav" id="products-nav" aria-label="Навигация по продукции">
+                <a href="#catalog">Каталог</a>
+                <a href="#about-products">О продукции</a>
+                <a href="#products-contacts">Контакты</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="products-hero" id="products-top" aria-labelledby="products-hero-title">
+            <div class="products-hero-content container">
+                <p class="eyebrow">Фермерская продукция</p>
+                <h1 id="products-hero-title">Вкус фермы.<br>Честный продукт.</h1>
+                <p class="products-hero-copy">Мясо птицы, яйца и продукты собственного хозяйства.</p>
+                <a href="#catalog" class="products-button products-button-primary">Смотреть каталог</a>
+            </div>
+            <a href="#catalog" class="hero-scroll-cue" aria-label="Перейти к каталогу"><span></span></a>
+        </section>
+
+        <section class="products-catalog" id="catalog" aria-labelledby="catalog-title">
+            <div class="container">
+                <div class="catalog-heading">
+                    <div>
+                        <p class="eyebrow">Из хозяйства — к вашему столу</p>
+                        <h2 id="catalog-title">Продукция фермы</h2>
+                    </div>
+                    <p class="catalog-demo-note">Выберите товар и свяжитесь с фермой в MAX. Наличие и условия уточняются в диалоге.</p>
+                </div>
+                <div id="catalog-status" class="catalog-status" role="status" aria-live="polite">Загружаем каталог…</div>
+                <div id="products-sections" class="products-sections"></div>
+            </div>
+        </section>
+
+        <section class="products-about" id="about-products">
+            <div class="container products-about-inner">
+                <p class="eyebrow">Семейное хозяйство</p>
+                <h2>Своё хозяйство.<br>Знакомый продукт.</h2>
+                <p>Мы выращиваем птицу и готовим продукцию на собственной ферме. Каталог показывает ассортимент и помогает выбрать то, что вам интересно.</p>
+                <a class="text-link" href="#products-contacts">Связаться с фермой <span aria-hidden="true">↘</span></a>
+            </div>
+        </section>
+
+        <section class="products-contacts" id="products-contacts">
+            <div class="container">
+                <p class="eyebrow">Мы на связи</p>
+                <h2>Контакты</h2>
+                <div class="products-contacts-grid">
+                    <div class="products-contact-item">
+                        <span class="products-contact-label">Телефон</span>
+                        <a id="products-contact-phone" class="products-contact-link"></a>
+                    </div>
+                    <div class="products-contact-item">
+                        <span class="products-contact-label">Адрес</span>
+                        <span id="products-contact-address" class="products-contact-link"></span>
+                    </div>
+                    <div class="products-contact-item">
+                        <span class="products-contact-label">Соцсети</span>
+                        <ul id="products-contact-socials" class="products-social-list"></ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="products-footer">
+        <div class="container products-footer-inner">
+            <div class="footer-copyright-container">
+                <p>© 2026 Ваша Птица Ферма. Все права защищены.</p>
+                <p class="author-signature">Спроектировано в chearu-stack</p>
+            </div>
+        </div>
+    </footer>
+
+    <dialog class="product-contact-dialog" id="product-contact-dialog" aria-labelledby="product-contact-title">
+        <form method="dialog">
+            <button class="product-contact-dialog-close" aria-label="Закрыть окно">×</button>
+        </form>
+        <p class="eyebrow">Связь с фермой</p>
+        <h2 id="product-contact-title">Уточнить по товару</h2>
+        <p class="product-contact-details" id="product-contact-details"></p>
+        <p class="product-contact-message-label">Текст обращения</p>
+        <p class="product-contact-message" id="product-contact-message" tabindex="0"></p>
+        <div class="product-contact-actions">
+            <button class="products-button products-button-secondary" type="button" id="product-contact-copy">Скопировать текст</button>
+            <a class="products-button products-button-primary" id="product-contact-max" href="#" target="_blank" rel="noopener noreferrer">Открыть MAX</a>
+        </div>
+        <p class="product-contact-feedback" id="product-contact-feedback" role="status" aria-live="polite"></p>
+    </dialog>
+
+    <script src="js/config.js" defer></script>
+    <script src="js/catalog-adapter.js" defer></script>
+    <script src="js/products.js" defer></script>
+</body>
+</html>

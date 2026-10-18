@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title desc">
+  <title id="title">Яйцо гуся</title><desc id="desc">Заглушка изображения товара для макета каталога.</desc>
+  <rect width="800" height="600" fill="#121316"/><rect x="20" y="20" width="760" height="560" rx="6" fill="none" stroke="#ffffff" stroke-opacity=".12"/>
+  <path d="M70 115h150M580 485h150" stroke="#7a1c1c" stroke-width="3"/><text x="400" y="112" fill="#9ca3af" font-family="Arial,sans-serif" font-size="18" letter-spacing="5" text-anchor="middle">ВАША ПТИЦА ФЕРМА</text>
+  <g transform="translate(340 190)" fill="none" stroke="#8b0000" stroke-width="5"><rect x="-44" y="-30" width="88" height="64" rx="5"/><circle cx="22" cy="-12" r="8"/><path d="m-35 24 23-24 17 15 12-11 20 20"/></g>
+  <text x="400" y="340" fill="#fff" font-family="Arial,sans-serif" font-size="42" font-weight="600" text-anchor="middle">Яйцо гуся</text><text x="400" y="394" fill="#9ca3af" font-family="Arial,sans-serif" font-size="19" letter-spacing="3" text-anchor="middle">ФОТО ТОВАРА</text>
+  <rect x="278" y="444" width="244" height="42" rx="21" fill="#7a1c1c" fill-opacity=".22" stroke="#7a1c1c"/><text x="400" y="471" fill="#e5e7eb" font-family="Arial,sans-serif" font-size="14" letter-spacing="2" text-anchor="middle">ЗАГЛУШКА ДЛЯ МАКЕТА</text>
+</svg>

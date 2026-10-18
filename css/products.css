@@ -1,0 +1,222 @@
+:root {
+    --gastronomy-bg: #121316;
+    --gastronomy-surface: #1a1b1e;
+    --gastronomy-border: rgba(255, 255, 255, 0.08);
+    --gastronomy-text: #ffffff;
+    --gastronomy-muted: #9ca3af;
+    --gastronomy-accent: #8b0000;
+    --gastronomy-accent-hover: #a31322;
+}
+
+body.theme-gastronomy {
+    color: var(--gastronomy-text);
+    background: var(--gastronomy-bg);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body.theme-gastronomy a { color: inherit; }
+
+.products-header {
+    background: rgba(18, 19, 22, 0.78);
+    border-bottom: 1px solid var(--gastronomy-border);
+}
+
+.products-header-inner {
+    min-height: 72px;
+    height: auto;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.products-header .logo { font-size: 1rem; }
+
+.direction-switch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 13px;
+    border: 1px solid var(--gastronomy-border);
+    border-radius: 4px;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.direction-link { color: var(--gastronomy-muted) !important; }
+.direction-link:hover, .direction-link.is-active { color: var(--gastronomy-text) !important; }
+.direction-link.is-active { text-decoration: underline; text-decoration-color: var(--gastronomy-accent); text-decoration-thickness: 2px; text-underline-offset: 6px; }
+.direction-divider { color: #666; }
+
+.products-nav {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 26px;
+}
+
+.products-nav a {
+    color: var(--gastronomy-muted) !important;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.products-nav a:hover { color: var(--gastronomy-text) !important; }
+
+.products-menu-toggle {
+    display: none;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--gastronomy-border);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--gastronomy-text);
+}
+
+.products-menu-toggle span { display: block; width: 19px; height: 1px; margin: 5px auto; background: currentColor; }
+
+.products-hero {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 140px 0 100px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    background-image: linear-gradient(90deg, rgba(11, 12, 14, 0.92) 0%, rgba(11, 12, 14, 0.74) 35%, rgba(11, 12, 14, 0.12) 100%), linear-gradient(0deg, rgba(11, 12, 14, 0.55), transparent 35%), url("../assets/images/products-hero.jpg");
+    background-position: center, center, center 54%;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.products-hero-content { position: relative; z-index: 1; }
+.eyebrow { color: #d2a47f; font-size: 0.73rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
+.products-hero h1 { max-width: 680px; margin: 22px 0 18px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(3.2rem, 7vw, 6.2rem); font-weight: 500; line-height: 0.98; letter-spacing: -0.045em; }
+.products-hero-copy { max-width: 460px; margin-bottom: 34px; color: #d1d1d2; font-size: 1.1rem; }
+
+.products-button {
+    min-height: 50px;
+    padding: 15px 24px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    font: inherit;
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.products-button-primary { color: #fff !important; background: var(--gastronomy-accent); }
+.products-button-secondary { border-color: rgba(255,255,255,.2); background: transparent; color: #fff !important; }
+.products-button-secondary:hover { border-color: #d2a47f; background: rgba(255,255,255,.05); }
+.products-button-primary:hover { background: var(--gastronomy-accent-hover); transform: translateY(-1px); }
+.products-button:focus-visible, .products-nav a:focus-visible, .direction-link:focus-visible { outline: 2px solid #d2a47f; outline-offset: 4px; }
+.hero-scroll-cue { position: absolute; bottom: 32px; left: 50%; width: 24px; height: 42px; border: 1px solid rgba(255,255,255,.5); border-radius: 20px; }
+.hero-scroll-cue span { position: absolute; top: 8px; left: 10px; width: 2px; height: 8px; background: white; animation: scroll-cue 1.4s ease-in-out infinite; }
+@keyframes scroll-cue { 0% { transform: translateY(0); opacity: 1; } 80%, 100% { transform: translateY(13px); opacity: 0; } }
+
+.products-catalog { padding: 94px 0 110px; background: var(--gastronomy-bg); scroll-margin-top: 82px; }
+.catalog-heading { display: flex; justify-content: space-between; align-items: end; gap: 28px; margin-bottom: 30px; }
+.catalog-heading h2, .products-about h2 { margin-top: 10px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.3rem, 4vw, 3.7rem); font-weight: 500; line-height: 1.08; }
+.catalog-demo-note { max-width: 360px; padding: 12px 16px; border-left: 2px solid var(--gastronomy-accent); color: var(--gastronomy-muted); font-size: 0.86rem; }
+.catalog-status { min-height: 24px; margin: 16px 0; color: var(--gastronomy-muted); }
+.catalog-status:empty { display: none; }
+.catalog-status.is-error { color: #ff9c9c; }
+.catalog-status.is-fallback { margin: 18px 0; padding: 14px 18px; border: 1px solid rgba(210, 164, 127, .42); border-left: 3px solid #d2a47f; background: #211c19; color: #f0c9a5; }
+.catalog-retry { margin-left: 12px; padding: 7px 12px; border: 1px solid var(--gastronomy-border); border-radius: 4px; background: transparent; color: white; cursor: pointer; }
+.products-category { margin-top: 64px; }
+.products-category:first-child { margin-top: 30px; }
+.products-category h3 { margin-bottom: 22px; font-size: 1.2rem; font-weight: 600; letter-spacing: 0.03em; }
+.products-category h3::after { content: ""; display: block; width: 46px; height: 2px; margin-top: 11px; background: var(--gastronomy-accent); }
+.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+.product-card { min-width: 0; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--gastronomy-border); border-radius: 6px; background: var(--gastronomy-surface); }
+.product-card-media { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: #202125; }
+.product-card-media img { width: 100%; height: 100%; object-fit: cover; transition: transform 300ms ease; }
+.product-card:hover .product-card-media img { transform: scale(1.025); }
+.product-card-media-fallback { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; color: var(--gastronomy-muted); text-align: center; }
+.product-card-body { flex: 1; display: flex; flex-direction: column; padding: 24px; }
+.product-card h4 { min-height: 3.2em; font-size: 1.14rem; font-weight: 600; line-height: 1.4; }
+.product-unit { margin-top: 4px; color: var(--gastronomy-muted); font-size: 0.9rem; }
+.product-price { margin: 20px 0 15px; font-size: 1.55rem; font-weight: 700; }
+.product-price small { color: var(--gastronomy-muted); font-size: 0.85rem; font-weight: 400; }
+.product-stock { display: flex; align-items: center; gap: 9px; color: #8fd2a0; font-size: 0.85rem; }
+.product-stock::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #58b977; }
+.product-stock.is-unavailable { color: #a8abb2; }
+.product-stock.is-unavailable::before { background: #747780; }
+.product-stock.product-status-on_order { color: #e8c98e; }
+.product-stock.product-status-on_order::before { background: #d6a84f; }
+.product-stock.product-status-seasonal { color: #a9c9dc; }
+.product-stock.product-status-seasonal::before { background: #75a9c5; }
+.product-card-action { width: 100%; margin-top: auto; padding-top: 24px; }
+.product-card-action:disabled { border-color: #4b4c50; background: #3a3b3f; color: #b7b7bb !important; cursor: not-allowed; transform: none; }
+
+.products-about { padding: 100px 0; background: #18191c; border-top: 1px solid var(--gastronomy-border); }
+.products-about-inner { max-width: 760px; }
+.products-about p:not(.eyebrow) { max-width: 610px; margin-top: 22px; color: #b7b9bf; }
+.text-link { display: inline-flex; gap: 10px; margin-top: 28px; color: #fff !important; font-weight: 600; }
+.text-link span { color: #d2a47f; }
+.products-contacts { padding: 88px 0 94px; border-top: 1px solid var(--gastronomy-border); background: #141518; scroll-margin-top: 82px; }
+.products-contacts h2 { margin: 10px 0 34px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.3rem, 4vw, 3.7rem); font-weight: 500; }
+.products-contacts-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.products-contact-item { min-width: 0; padding: 24px; border: 1px solid var(--gastronomy-border); border-radius: 5px; background: var(--gastronomy-surface); }
+.products-contact-label { display: block; margin-bottom: 12px; color: #d2a47f; font-size: .73rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.products-contact-link { color: #e5e5e6 !important; line-height: 1.65; overflow-wrap: anywhere; }
+.products-social-list { display: flex; flex-wrap: wrap; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.products-social-list a { display: inline-flex; padding: 8px 11px; border: 1px solid var(--gastronomy-border); border-radius: 4px; color: #e5e5e6 !important; font-size: .86rem; }
+.products-social-list a:hover { border-color: #d2a47f; }
+.products-footer { padding: 30px 0; border-top: 1px solid var(--gastronomy-border); background: #0b0c0e; }
+.products-footer-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--gastronomy-muted); font-size: 0.82rem; text-align: center; }
+.products-footer p { margin: 0; }
+.products-footer .footer-copyright-container { width: 100%; text-align: center; line-height: 1.7; }
+.products-footer .author-signature { color: #d2a47f; }
+.footer-brand { color: #fff !important; font-weight: 700; }
+
+.product-contact-dialog { width: min(92vw, 480px); margin: auto; padding: 34px; border: 1px solid rgba(255,255,255,.14); border-radius: 7px; background: #1a1b1e; color: white; box-shadow: 0 24px 80px rgba(0,0,0,.55); }
+.product-contact-dialog::backdrop { background: rgba(0,0,0,.72); backdrop-filter: blur(4px); }
+.product-contact-dialog form { position: absolute; top: 12px; right: 12px; }
+.product-contact-dialog-close { width: 36px; height: 36px; border: 0; background: transparent; color: white; font-size: 1.8rem; cursor: pointer; }
+.product-contact-dialog h2 { margin: 10px 0; font-family: Georgia, "Times New Roman", serif; font-size: 2rem; font-weight: 500; }
+.product-contact-dialog p:not(.eyebrow) { margin: 12px 0 18px; color: #c1c2c6; }
+.product-contact-dialog .product-contact-message-label { margin-bottom: 6px !important; color: #d2a47f !important; font-size: .76rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.product-contact-dialog .product-contact-message { padding: 14px; border: 1px solid var(--gastronomy-border); border-radius: 4px; background: #121316; color: #eee; line-height: 1.6; user-select: text; }
+.product-contact-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 22px; }
+.product-contact-actions .products-button { width: 100%; min-height: 48px; padding: 10px; font-size: .72rem; text-align: center; }
+.product-contact-feedback { min-height: 1.5em; margin-bottom: 0 !important; color: #d2a47f !important; font-size: .82rem; }
+
+@media (max-width: 900px) {
+    .products-header-inner { gap: 14px; }
+    .products-header .logo { font-size: .86rem; }
+    .products-nav { gap: 16px; }
+    .products-nav a { font-size: .74rem; }
+}
+
+@media (max-width: 700px) {
+    .products-header-inner { min-height: 64px; flex-wrap: wrap; gap: 10px; padding-top: 8px; padding-bottom: 8px; }
+    .products-header .logo { margin-right: auto; font-size: .82rem; }
+    .direction-switch { order: 3; width: 100%; justify-content: center; padding: 7px; }
+    .products-menu-toggle { display: block; order: 2; }
+    .products-nav { display: none; order: 4; width: 100%; margin: 0; padding: 10px 0 4px; flex-direction: column; align-items: stretch; gap: 0; }
+    .products-nav.is-open { display: flex; }
+    .products-nav a { padding: 12px 8px; border-top: 1px solid var(--gastronomy-border); font-size: .82rem; }
+    .products-hero { padding-top: 190px; padding-bottom: 95px; background-image: linear-gradient(90deg, rgba(11, 12, 14, 0.87), rgba(11, 12, 14, 0.38)), linear-gradient(0deg, rgba(11, 12, 14, 0.65), transparent 60%), url("../assets/images/products-hero.jpg"); background-position: center, center, 62% center; }
+    .products-hero h1 { font-size: clamp(3.1rem, 13vw, 5rem); }
+    .catalog-heading { align-items: flex-start; flex-direction: column; }
+    .catalog-demo-note { max-width: 100%; }
+    .products-catalog { padding: 74px 0; }
+    .products-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 18px; padding: 0; }
+    .product-card-body { padding: 19px; }
+    .products-about { padding: 76px 0; }
+    .products-contacts { padding: 70px 0; }
+    .products-contacts-grid { grid-template-columns: 1fr; gap: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
