@@ -111,6 +111,29 @@
         <p class="product-contact-feedback" id="product-contact-feedback" role="status" aria-live="polite"></p>
     </dialog>
 
+    <dialog class="product-details-dialog" id="product-details-dialog" aria-labelledby="product-details-title">
+        <div class="product-details-shell">
+            <div class="product-details-drag-region" id="product-details-drag-region" aria-hidden="true">
+                <span class="product-details-drag-handle"></span>
+            </div>
+            <form method="dialog" class="product-details-close-form">
+                <button class="product-details-close" type="submit" aria-label="Закрыть детали товара">×</button>
+            </form>
+            <img class="product-details-image" id="product-details-image" alt="">
+            <div class="product-details-content">
+                <h2 id="product-details-title"></h2>
+                <section class="product-details-section product-details-note" id="product-details-note-section" aria-labelledby="product-details-note-heading" hidden>
+                    <h3 id="product-details-note-heading">Заметка хозяина</h3>
+                    <p id="product-details-note"></p>
+                </section>
+                <section class="product-details-section" id="product-details-facts-section" aria-labelledby="product-details-facts-heading" hidden>
+                    <h3 id="product-details-facts-heading">Характеристики</h3>
+                    <p id="product-details-facts"></p>
+                </section>
+            </div>
+        </div>
+    </dialog>
+
     <script src="js/config.js" defer></script>
     <script src="js/catalog-adapter.js" defer></script>
     <script src="js/products.js" defer></script>
