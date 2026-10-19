@@ -19,6 +19,7 @@
         seasonal: { label: 'Сезонный товар', button: 'Оставить заявку на сезон' },
         waitlist: { label: 'Лист ожидания', button: 'Уточнить лист ожидания' },
     };
+    const catalogStatusOrder = { in_stock: 0, on_order: 1, seasonal: 2 };
     const allowedCategories = new Set(categoryOrder.map(([category]) => category));
     const strictStatuses = new Set(['in_stock', 'on_order', 'seasonal', 'waitlist']);
     const catalogConfig = window.APP_CONFIG && window.APP_CONFIG.productsCatalog;
@@ -221,7 +222,9 @@
             : categoryOrder.map(([category]) => category);
         for (const category of categories) {
             const label = categoryOrder.find(([key]) => key === category)?.[1] || category;
-            const categoryProducts = validProducts.filter((product) => (product.category || 'Прочее') === category);
+            const categoryProducts = validProducts
+                .filter((product) => (product.category || 'Прочее') === category)
+                .sort((left, right) => (catalogStatusOrder[left.status] ?? 3) - (catalogStatusOrder[right.status] ?? 3));
             if (!categoryProducts.length) continue;
             const section = document.createElement('section');
             section.className = 'products-category';
