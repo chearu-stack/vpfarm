@@ -1,17 +1,7 @@
 /* Temporary, reversible adapter for the shared Google Sheets CSV catalog. */
 (() => {
-    const aliases = {
-        id: ['id', 'product_id', 'sku'],
-        name: ['name', 'title', 'product', 'product_name', 'наименование', 'название'],
-        category: ['category', 'категория', 'раздел'],
-        unit: ['unit', 'единица', 'ед_изм', 'единица_измерения'],
-        price: ['price', 'цена', 'стоимость'],
-        currency: ['currency', 'валюта'],
-        status: ['status', 'availability', 'in_stock', 'наличие', 'статус'],
-        image_url: ['image_url', 'image', 'photo', 'фото', 'изображение', 'ссылка_на_фото'],
-    };
-
-    const cleanHeader = (value) => String(value ?? '').trim().toLowerCase().replace(/[\s-]+/g, '_');
+    const requiredHeaders = ['id', 'name', 'category', 'unit', 'price', 'currency', 'status', 'image_url'];
+    const optionalHeaders = ['note', 'details'];
 
     function parseCsv(text) {
         const rows = [];
@@ -59,16 +49,24 @@
         const rows = parseCsv(text);
         if (!rows.length) return [];
 
-        const headers = rows[0].map((value) => cleanHeader(String(value).replace(/^\uFEFF/, '')));
-        const columns = Object.fromEntries(Object.entries(aliases).map(([field, names]) => [
-            field,
-            headers.findIndex((header) => names.includes(header)),
-        ]));
+        const headers = rows[0].map((value) => String(value).trim().replace(/^\uFEFF/, ''));
+        const optional = headers.slice(requiredHeaders.length);
+        const validHeaders = headers.slice(0, requiredHeaders.length).every((header, index) => header === requiredHeaders[index])
+            && (optional.length === 0 || optional.length === 1 && optional[0] === optionalHeaders[0]
+                || optional.length === 2 && optional.every((header, index) => header === optionalHeaders[index]));
+        if (headers.length < requiredHeaders.length || headers.length > requiredHeaders.length + optionalHeaders.length || !validHeaders) {
+            throw new Error('Заголовки CSV должны содержать 8, 9 или 10 полей в утверждённом порядке');
+        }
 
         return rows.slice(1).map((cells, index) => {
-            const value = (field) => columns[field] >= 0 ? String(cells[columns[field]] ?? '').trim() : '';
+            const value = (field) => {
+                const column = headers.indexOf(field);
+                return column >= 0 ? String(cells[column] ?? '').trim() : '';
+            };
             const rawCategory = value('category');
             const status = normalizeStatus(value('status'));
+            const note = value('note');
+            const details = value('details');
             return {
                 id: value('id') || `sheet-row-${index + 1}`,
                 name: value('name') || cells.find((cell) => String(cell).trim()) || `Товар ${index + 1}`,
@@ -79,6 +77,8 @@
                 status: status.code,
                 statusLabel: status.label,
                 image_url: value('image_url'),
+                note: note || null,
+                details: details || null,
             };
         });
     }
@@ -98,14 +98,16 @@
             error.isNetworkFailure = response.status >= 500;
             throw error;
         }
+        let csvText;
         try {
-            return parse(await response.text());
+            csvText = await response.text();
         } catch (cause) {
             const error = new Error('Соединение с CSV прервалось во время загрузки');
             error.isNetworkFailure = true;
             error.cause = cause;
             throw error;
         }
+        return parse(csvText);
     }
 
     window.ProductCatalogAdapter = { load };

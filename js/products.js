@@ -12,6 +12,14 @@
     const dialogProduct = document.getElementById('product-contact-details');
     const dialogMessage = document.getElementById('product-contact-message');
     const copyFeedback = document.getElementById('product-contact-feedback');
+    const detailsDialog = document.getElementById('product-details-dialog');
+    const detailsTitle = document.getElementById('product-details-title');
+    const detailsImage = document.getElementById('product-details-image');
+    const noteSection = document.getElementById('product-details-note-section');
+    const noteText = document.getElementById('product-details-note');
+    const detailsSection = document.getElementById('product-details-facts-section');
+    const detailsText = document.getElementById('product-details-facts');
+    const detailsDragRegion = document.getElementById('product-details-drag-region');
     const statusDetails = {
         in_stock: { label: 'В наличии', button: 'Связаться по поводу товара' },
         out_of_stock: { label: 'Нет в наличии', button: 'Уточнить наличие' },
@@ -28,6 +36,8 @@
     const formatPrice = (price) => price === null || price === undefined || price === ''
         ? 'Цена уточняется'
         : new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(price);
+
+    const optionalText = (value) => typeof value === 'string' ? value.trim() : '';
 
     function getProductStatus(product) {
         return statusDetails[product.status] || {
@@ -64,12 +74,60 @@
         dialog.showModal();
     }
 
+    function openProductDetails(product) {
+        const note = optionalText(product.note);
+        const details = optionalText(product.details);
+        if (!note && !details) return;
+
+        detailsTitle.textContent = product.name || '';
+        noteText.textContent = note;
+        noteSection.hidden = !note;
+        detailsText.textContent = details;
+        detailsSection.hidden = !details;
+
+        detailsImage.alt = product.name || 'Фото товара';
+        detailsImage.dataset.placeholder = 'false';
+        detailsImage.onerror = () => {
+            if (detailsImage.dataset.placeholder === 'true') {
+                detailsImage.hidden = true;
+                return;
+            }
+            detailsImage.dataset.placeholder = 'true';
+            detailsImage.src = 'img/products/product-placeholder.svg';
+        };
+        const imageUrl = product.image_url && isSafeImageUrl(product.image_url)
+            ? String(product.image_url).trim()
+            : 'img/products/product-placeholder.svg';
+        detailsImage.hidden = false;
+        detailsImage.src = imageUrl;
+
+        detailsDialog.showModal();
+        document.body.classList.add('has-open-product-details');
+    }
+
     function renderProduct(product) {
         const article = document.createElement('article');
         article.className = 'product-card';
 
         const media = document.createElement('div');
         media.className = 'product-card-media';
+        const imageTrigger = document.createElement('div');
+        imageTrigger.className = 'product-card-image-trigger';
+        const hasDetails = Boolean(optionalText(product.note) || optionalText(product.details));
+        if (hasDetails) {
+            imageTrigger.setAttribute('role', 'button');
+            imageTrigger.tabIndex = 0;
+            imageTrigger.setAttribute('aria-label', 'Просмотреть детали товара');
+            imageTrigger.addEventListener('click', (event) => {
+                if (event.target === image || event.detail === 0) openProductDetails(product);
+            });
+            imageTrigger.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openProductDetails(product);
+                }
+            });
+        }
         const placeholderUrl = 'img/products/product-placeholder.svg';
         const image = document.createElement('img');
         image.alt = product.name || 'Фото товара';
@@ -92,7 +150,8 @@
         const imageUrl = product.image_url && String(product.image_url).trim();
         if (imageUrl && isSafeImageUrl(imageUrl)) image.src = imageUrl;
         else showImageFallback();
-        media.append(image);
+        imageTrigger.append(image);
+        media.append(imageTrigger);
 
         const body = document.createElement('div');
         body.className = 'product-card-body';
@@ -149,6 +208,8 @@
             if (product.currency !== 'RUB') throw new Error(`У товара ${product.id} currency должна быть RUB`);
             if (!strictStatuses.has(product.status)) throw new Error(`У товара ${product.id} неизвестный status`);
             if (typeof product.image_url !== 'string') throw new Error(`У товара ${product.id} image_url должен быть строкой`);
+            if (product.note !== undefined && product.note !== null && typeof product.note !== 'string') throw new Error(`У товара ${product.id} note должен быть строкой или null`);
+            if (product.details !== undefined && product.details !== null && typeof product.details !== 'string') throw new Error(`У товара ${product.id} details должен быть строкой или null`);
             if (product.image_url.trim() && product.image_url.startsWith('img/')) {
                 const pathSegments = product.image_url.split('/');
                 if (pathSegments.some((segment) => !segment || segment === '.' || segment === '..') || product.image_url.includes('\\')) {
@@ -191,15 +252,25 @@
         if (!rows.length) throw new Error('CSV-таблица пуста');
         const headers = rows[0].map((value) => value.trim().replace(/^\uFEFF/, ''));
         const requiredHeaders = ['id', 'name', 'category', 'unit', 'price', 'currency', 'status', 'image_url'];
-        if (headers.length !== requiredHeaders.length || headers.some((header, index) => header !== requiredHeaders[index])) {
-            throw new Error('Заголовки таблицы должны точно совпадать с утверждённым контрактом и порядком полей');
+        const optionalHeaders = ['note', 'details'];
+        const optional = headers.slice(requiredHeaders.length);
+        const validHeaders = headers.slice(0, requiredHeaders.length).every((header, index) => header === requiredHeaders[index])
+            && (optional.length === 0 || optional.length === 1 && optional[0] === optionalHeaders[0]
+                || optional.length === 2 && optional.every((header, index) => header === optionalHeaders[index]));
+        if (headers.length < requiredHeaders.length || headers.length > requiredHeaders.length + optionalHeaders.length || !validHeaders) {
+            throw new Error('Заголовки таблицы должны содержать 8, 9 или 10 полей в утверждённом порядке');
         }
         const products = rows.slice(1)
             .map((row) => {
                 const values = Object.fromEntries(headers.map((header, index) => [header, row[index] ?? '']));
                 const rawPrice = String(values.price).trim();
                 const price = rawPrice === '' ? Number.NaN : (typeof values.price === 'number' ? values.price : Number(rawPrice.replace(',', '.')));
-                return { ...values, price };
+                return {
+                    ...values,
+                    price,
+                    note: optionalText(values.note) || null,
+                    details: optionalText(values.details) || null,
+                };
             });
         return validateCatalog(products);
     }
@@ -333,6 +404,42 @@
             document.querySelector('.products-menu-toggle').setAttribute('aria-expanded', 'false');
         });
     });
+
+    detailsDialog.addEventListener('click', (event) => {
+        if (event.target === detailsDialog) detailsDialog.close();
+    });
+    detailsDialog.addEventListener('close', () => {
+        document.body.classList.remove('has-open-product-details');
+        detailsDialog.classList.remove('is-dragging');
+        detailsDialog.style.removeProperty('--sheet-drag-y');
+    });
+
+    let dragStart = null;
+    detailsDragRegion.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
+        dragStart = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+        detailsDragRegion.setPointerCapture(event.pointerId);
+        detailsDialog.classList.add('is-dragging');
+    });
+    detailsDragRegion.addEventListener('pointermove', (event) => {
+        if (!dragStart || event.pointerId !== dragStart.pointerId) return;
+        const distance = Math.max(0, event.clientY - dragStart.y);
+        detailsDialog.style.setProperty('--sheet-drag-y', `${distance}px`);
+    });
+    const finishSheetDrag = (event) => {
+        if (!dragStart || event.pointerId !== dragStart.pointerId) return;
+        const distanceY = event.clientY - dragStart.y;
+        const distanceX = event.clientX - dragStart.x;
+        dragStart = null;
+        detailsDialog.classList.remove('is-dragging');
+        if (distanceY > 80 && distanceY > Math.abs(distanceX)) {
+            detailsDialog.close();
+        } else {
+            detailsDialog.style.removeProperty('--sheet-drag-y');
+        }
+    };
+    detailsDragRegion.addEventListener('pointerup', finishSheetDrag);
+    detailsDragRegion.addEventListener('pointercancel', finishSheetDrag);
 
     document.getElementById('product-contact-copy').addEventListener('click', async () => {
         try {
