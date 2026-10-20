@@ -31,6 +31,10 @@
     const allowedCategories = new Set(categoryOrder.map(([category]) => category));
     const strictStatuses = new Set(['in_stock', 'on_order', 'seasonal', 'waitlist']);
     const catalogConfig = window.APP_CONFIG && window.APP_CONFIG.productsCatalog;
+    const catalogCacheKey = 'vpfarm_catalog_cache_v1';
+    const catalogCacheVersion = 1;
+    const catalogCacheTtlMs = 48 * 60 * 60 * 1000;
+    const catalogFetchTimeoutMs = 10000;
     let activeCatalogIsFallback = false;
 
     const formatPrice = (price) => price === null || price === undefined || price === ''
@@ -224,6 +228,122 @@
         return products;
     }
 
+    function validatePermissiveCatalog(products) {
+        if (!Array.isArray(products)) throw new Error('Ожидался массив товаров');
+        const ids = new Set();
+        for (const product of products) {
+            if (!product || typeof product !== 'object' || Array.isArray(product)) throw new Error('Некорректная запись товара');
+            if (typeof product.id !== 'string' || !product.id.trim()) throw new Error('У товара отсутствует строковый id');
+            if (ids.has(product.id)) throw new Error(`Повторяется id товара: ${product.id}`);
+            ids.add(product.id);
+            if (typeof product.name !== 'string' || !product.name.trim()) throw new Error(`У товара ${product.id} отсутствует name`);
+            for (const field of ['category', 'unit', 'currency', 'status', 'image_url']) {
+                if (typeof product[field] !== 'string') throw new Error(`У товара ${product.id} поле ${field} должно быть строкой`);
+            }
+            if (product.price !== null && (typeof product.price !== 'number' || !Number.isFinite(product.price) || product.price < 0)) {
+                throw new Error(`У товара ${product.id} некорректная price`);
+            }
+            if (product.statusLabel !== undefined && typeof product.statusLabel !== 'string') {
+                throw new Error(`У товара ${product.id} statusLabel должен быть строкой`);
+            }
+            for (const field of ['note', 'details']) {
+                if (product[field] !== undefined && product[field] !== null && typeof product[field] !== 'string') {
+                    throw new Error(`У товара ${product.id} поле ${field} должно быть строкой или null`);
+                }
+            }
+        }
+        return products;
+    }
+
+    function validateCatalogForMode(products) {
+        return catalogConfig && catalogConfig.mode === 'permissive'
+            ? validatePermissiveCatalog(products)
+            : validateCatalog(products);
+    }
+
+    function readCatalogCache() {
+        try {
+            const raw = window.localStorage.getItem(catalogCacheKey);
+            if (!raw) return null;
+            const cached = JSON.parse(raw);
+            const expectedSource = catalogConfig && catalogConfig.csvUrl || '';
+            const expectedMode = catalogConfig && catalogConfig.mode || 'strict';
+            if (!cached || cached.version !== catalogCacheVersion || cached.source !== expectedSource
+                || cached.mode !== expectedMode || !Number.isFinite(cached.timestamp)
+                || cached.timestamp <= 0 || cached.timestamp > Date.now() + 5 * 60 * 1000) {
+                throw new Error('Некорректные метаданные кэша каталога');
+            }
+            validateCatalogForMode(cached.products);
+            return cached;
+        } catch (error) {
+            try { window.localStorage.removeItem(catalogCacheKey); } catch { /* localStorage недоступен */ }
+            return null;
+        }
+    }
+
+    function saveCatalogCache(products) {
+        try {
+            window.localStorage.setItem(catalogCacheKey, JSON.stringify({
+                version: catalogCacheVersion,
+                source: catalogConfig && catalogConfig.csvUrl || '',
+                mode: catalogConfig && catalogConfig.mode || 'strict',
+                timestamp: Date.now(),
+                products,
+            }));
+        } catch (error) {
+            console.warn('Не удалось сохранить кэш каталога в localStorage:', error);
+        }
+    }
+
+    function formatCatalogTimestamp(timestamp) {
+        return new Intl.DateTimeFormat('ru-RU', {
+            day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+        }).format(new Date(timestamp));
+    }
+
+    function showCatalogStatus(message, state = '') {
+        catalogStatus.textContent = message;
+        catalogStatus.className = `catalog-status${state ? ` is-${state}` : ''}`;
+    }
+
+    function showCachedCatalogStatus(timestamp, updateFailed = false) {
+        const age = Date.now() - timestamp;
+        const dateLabel = formatCatalogTimestamp(timestamp);
+        const staleLabel = age > catalogCacheTtlMs ? 'Кэш старше 48 часов и может быть устаревшим. ' : '';
+        const refreshLabel = updateFailed ? 'Не удалось проверить обновления. ' : 'Проверяем обновления. ';
+        showCatalogStatus(`${staleLabel}Каталог сохранён ${dateLabel}. ${refreshLabel}Цены и наличие уточняются.`, 'stale');
+    }
+
+    async function fetchTextWithTimeout(url) {
+        const controller = new AbortController();
+        const timeoutId = window.setTimeout(() => controller.abort(), catalogFetchTimeoutMs);
+        try {
+            const response = await fetch(url, { cache: 'no-store', signal: controller.signal });
+            if (!response.ok) throw new Error(`Источник каталога вернул HTTP ${response.status}`);
+            return await response.text();
+        } catch (error) {
+            if (error && error.name === 'AbortError') throw new Error('Истекло время ожидания источника каталога (10 секунд)');
+            throw error;
+        } finally {
+            window.clearTimeout(timeoutId);
+        }
+    }
+
+    async function fetchJsonWithTimeout(url) {
+        const controller = new AbortController();
+        const timeoutId = window.setTimeout(() => controller.abort(), catalogFetchTimeoutMs);
+        try {
+            const response = await fetch(url, { cache: 'no-store', signal: controller.signal });
+            if (!response.ok) throw new Error(`Резервный каталог вернул HTTP ${response.status}`);
+            return await response.json();
+        } catch (error) {
+            if (error && error.name === 'AbortError') throw new Error('Истекло время ожидания резервного каталога (10 секунд)');
+            throw error;
+        } finally {
+            window.clearTimeout(timeoutId);
+        }
+    }
+
     function parseCsv(text) {
         const rows = [];
         let row = [];
@@ -278,7 +398,7 @@
     function renderCatalog(products, isFallback = false, permissive = false) {
         activeCatalogIsFallback = isFallback;
         sections.replaceChildren();
-        const validProducts = permissive ? products : validateCatalog(products);
+        const validProducts = permissive ? validatePermissiveCatalog(products) : validateCatalog(products);
 
         const categories = permissive
             ? [...new Set(validProducts.map((product) => product.category || 'Прочее'))]
@@ -321,9 +441,7 @@
             return window.ProductCatalogAdapter.load(catalogConfig.csvUrl);
         }
         if (!catalogConfig || !catalogConfig.csvUrl) throw new Error('Не настроен URL опубликованного CSV Google Таблицы');
-        const response = await fetch(catalogConfig.csvUrl, { cache: 'no-store' });
-        if (!response.ok) throw new Error(`CSV Google Таблицы вернул HTTP ${response.status}`);
-        return parseGoogleSheetCsv(await response.text());
+        return parseGoogleSheetCsv(await fetchTextWithTimeout(catalogConfig.csvUrl));
     }
 
     function renderContactDetails() {
@@ -356,27 +474,39 @@
     }
 
     async function loadCatalog() {
-        catalogStatus.textContent = 'Загружаем актуальный каталог…';
-        catalogStatus.className = 'catalog-status';
+        const permissive = catalogConfig && catalogConfig.mode === 'permissive';
+        const cached = readCatalogCache();
+        if (cached) {
+            renderCatalog(cached.products, false, permissive);
+            showCachedCatalogStatus(cached.timestamp);
+        } else {
+            sections.replaceChildren();
+            showCatalogStatus('Загружаем актуальный каталог…');
+        }
+
         try {
-            const products = await loadLiveCatalog();
-            renderCatalog(products, false, catalogConfig && catalogConfig.mode === 'permissive');
+            const products = validateCatalogForMode(await loadLiveCatalog());
+            const unchanged = cached && JSON.stringify(cached.products) === JSON.stringify(products);
+            saveCatalogCache(products);
+            if (unchanged) {
+                activeCatalogIsFallback = false;
+                showCatalogStatus('');
+            } else {
+                renderCatalog(products, false, permissive);
+            }
         } catch (error) {
             console.error('Не удалось загрузить CSV-каталог Google Sheets:', error);
-            if (catalogConfig && catalogConfig.mode === 'permissive' && !error.isNetworkFailure) {
-                sections.replaceChildren();
-                catalogStatus.className = 'catalog-status is-error';
-                catalogStatus.textContent = `${error.message}. Проверьте доступ к Google Таблице.`;
+            if (cached) {
+                showCachedCatalogStatus(cached.timestamp, true);
                 return;
             }
             try {
-                const response = await fetch('mock/products.json', { cache: 'no-store' });
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                renderCatalog(await response.json(), true);
+                const fallbackProducts = validateCatalogForMode(await fetchJsonWithTimeout('mock/products.json'));
+                renderCatalog(fallbackProducts, true, permissive);
                 const sourceMessage = catalogConfig && catalogConfig.csvUrl
                     ? 'Опубликованный CSV недоступен или вернул некорректные данные.'
                     : 'Публичный CSV URL Google Таблицы ещё не настроен.';
-                catalogStatus.textContent = `${sourceMessage} Показан резервный каталог: цены и статусы могут быть устаревшими, уточните их в MAX.`;
+                showCatalogStatus(`${sourceMessage} Показан резервный каталог: цены и статусы могут быть устаревшими, уточните их в MAX.`, 'fallback');
             } catch (fallbackError) {
                 console.error('Не удалось загрузить аварийный JSON-каталог:', fallbackError);
                 catalogStatus.className = 'catalog-status is-error';

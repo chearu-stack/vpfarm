@@ -2,6 +2,7 @@
 (() => {
     const requiredHeaders = ['id', 'name', 'category', 'unit', 'price', 'currency', 'status', 'image_url'];
     const optionalHeaders = ['note', 'details'];
+    const fetchTimeoutMs = 10000;
 
     function parseCsv(text) {
         const rows = [];
@@ -47,7 +48,7 @@
 
     function parse(text) {
         const rows = parseCsv(text);
-        if (!rows.length) return [];
+        if (!rows.length) throw new Error('CSV пуст: отсутствует строка заголовков');
 
         const headers = rows[0].map((value) => String(value).trim().replace(/^\uFEFF/, ''));
         const optional = headers.slice(requiredHeaders.length);
@@ -84,30 +85,29 @@
     }
 
     async function load(csvUrl) {
-        let response;
+        const controller = new AbortController();
+        const timeoutId = window.setTimeout(() => controller.abort(), fetchTimeoutMs);
         try {
-            response = await fetch(csvUrl, { cache: 'no-store' });
+            const response = await fetch(csvUrl, { cache: 'no-store', signal: controller.signal });
+            if (!response.ok) {
+                const error = new Error(`CSV Google Таблицы вернул HTTP ${response.status}`);
+                error.isNetworkFailure = response.status >= 500;
+                throw error;
+            }
+            return parse(await response.text());
         } catch (cause) {
-            const error = new Error('Не удалось получить CSV из-за сетевой ошибки');
+            if (cause && typeof cause.message === 'string' && cause.message.startsWith('CSV Google Таблицы вернул HTTP')) throw cause;
+            if (cause instanceof Error && !cause.name.includes('Abort') && !controller.signal.aborted
+                && !(cause instanceof TypeError)) throw cause;
+            const error = new Error(cause && cause.name === 'AbortError'
+                ? 'Истекло время ожидания CSV (10 секунд)'
+                : 'Не удалось получить CSV из-за сетевой ошибки');
             error.isNetworkFailure = true;
             error.cause = cause;
             throw error;
+        } finally {
+            window.clearTimeout(timeoutId);
         }
-        if (!response.ok) {
-            const error = new Error(`CSV Google Таблицы вернул HTTP ${response.status}`);
-            error.isNetworkFailure = response.status >= 500;
-            throw error;
-        }
-        let csvText;
-        try {
-            csvText = await response.text();
-        } catch (cause) {
-            const error = new Error('Соединение с CSV прервалось во время загрузки');
-            error.isNetworkFailure = true;
-            error.cause = cause;
-            throw error;
-        }
-        return parse(csvText);
     }
 
     window.ProductCatalogAdapter = { load };
