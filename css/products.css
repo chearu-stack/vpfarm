@@ -129,7 +129,7 @@ body.theme-gastronomy a { color: inherit; }
 .catalog-status { min-height: 24px; margin: 16px 0; color: var(--gastronomy-muted); }
 .catalog-status:empty { display: none; }
 .catalog-status.is-error { color: #ff9c9c; }
-.catalog-status.is-fallback { margin: 18px 0; padding: 14px 18px; border: 1px solid rgba(210, 164, 127, .42); border-left: 3px solid #d2a47f; background: #211c19; color: #f0c9a5; }
+.catalog-status.is-fallback, .catalog-status.is-stale { margin: 18px 0; padding: 14px 18px; border: 1px solid rgba(210, 164, 127, .42); border-left: 3px solid #d2a47f; background: #211c19; color: #f0c9a5; }
 .catalog-retry { margin-left: 12px; padding: 7px 12px; border: 1px solid var(--gastronomy-border); border-radius: 4px; background: transparent; color: white; cursor: pointer; }
 .products-category { margin-top: 64px; }
 .products-category:first-child { margin-top: 30px; }
