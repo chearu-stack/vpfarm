@@ -30,6 +30,7 @@ body.theme-gastronomy a { color: inherit; }
 }
 
 .products-header .logo { font-size: 1rem; }
+.products-header .logo-mark { width: 38px; height: 38px; }
 
 .direction-switch {
     display: flex;
@@ -238,7 +239,8 @@ body.has-open-product-details { overflow: hidden; }
 
 @media (max-width: 700px) {
     .products-header-inner { min-height: 64px; flex-wrap: wrap; gap: 10px; padding-top: 8px; padding-bottom: 8px; }
-    .products-header .logo { margin-right: auto; font-size: .82rem; }
+    .products-header .logo { margin-right: auto; gap: 8px; font-size: .82rem; }
+    .products-header .logo-mark { width: 32px; height: 32px; }
     .direction-switch { order: 3; width: 100%; justify-content: center; padding: 7px; }
     .products-menu-toggle { display: block; order: 2; }
     .products-nav { display: none; order: 4; width: 100%; margin: 0; padding: 10px 0 4px; flex-direction: column; align-items: stretch; gap: 0; }

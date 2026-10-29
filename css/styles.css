@@ -166,12 +166,24 @@ a:hover {
 }
 
 .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
     font-size: 1.5rem;
     font-weight: 700;
     color: #ffffff;
     letter-spacing: 1px;
     text-transform: uppercase;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.logo-mark {
+    display: block;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 auto;
+    object-fit: contain;
+    border-radius: 50%;
 }
 
 .logo-main {
@@ -686,6 +698,15 @@ a:hover {
     }
     .hero-title {
         font-size: 1.75rem;
+    }
+    .logo {
+        gap: 8px;
+        font-size: 1rem;
+        letter-spacing: 0.04em;
+    }
+    .logo-mark {
+        width: 36px;
+        height: 36px;
     }
     .section-title {
         font-size: 1.5rem;
