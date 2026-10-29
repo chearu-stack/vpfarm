@@ -4,6 +4,11 @@
   // ---------- Конфигурация ----------
   const CONFIG = window.APP_CONFIG || {};
   const API_BASE_URL = (CONFIG.API_BASE_URL || '').replace(/\/$/, '');
+  const BREEDS_API_URL = `${API_BASE_URL}/api/breeds`;
+  const BREEDS_CACHE_KEY = 'vpfarm_breeds_cache_v1';
+  const BREEDS_CACHE_VERSION = 1;
+  const BREEDS_CACHE_TTL_MS = 48 * 60 * 60 * 1000;
+  const BREEDS_FETCH_TIMEOUT_MS = 10000;
 
   // ---------- Утилиты ----------
   function escapeHtml(str) {
@@ -209,33 +214,119 @@
   }
 
   // ---------- Каталог пород ----------
+  function validateBreeds(breeds) {
+    if (!Array.isArray(breeds)) throw new Error('Каталог пород должен быть списком');
+
+    for (const breed of breeds) {
+      if (!breed || typeof breed !== 'object'
+          || typeof breed.id !== 'string' || !breed.id.trim()
+          || typeof breed.name !== 'string' || !breed.name.trim()
+          || !(breed.price === null || typeof breed.price === 'number' && Number.isFinite(breed.price))) {
+        throw new Error('Каталог пород не соответствует ожидаемому формату');
+      }
+    }
+    return breeds;
+  }
+
+  function readBreedsCache() {
+    try {
+      const raw = window.localStorage.getItem(BREEDS_CACHE_KEY);
+      if (!raw) return null;
+
+      const cached = JSON.parse(raw);
+      if (!cached || cached.version !== BREEDS_CACHE_VERSION || cached.source !== BREEDS_API_URL
+          || !Number.isFinite(cached.timestamp) || cached.timestamp <= 0
+          || cached.timestamp > Date.now() + 5 * 60 * 1000) {
+        throw new Error('Некорректные метаданные кэша пород');
+      }
+      validateBreeds(cached.breeds);
+      return cached;
+    } catch (error) {
+      try { window.localStorage.removeItem(BREEDS_CACHE_KEY); } catch { /* localStorage недоступен */ }
+      return null;
+    }
+  }
+
+  function saveBreedsCache(breeds) {
+    try {
+      window.localStorage.setItem(BREEDS_CACHE_KEY, JSON.stringify({
+        version: BREEDS_CACHE_VERSION,
+        source: BREEDS_API_URL,
+        timestamp: Date.now(),
+        breeds
+      }));
+    } catch (error) {
+      console.warn('Не удалось сохранить кэш каталога пород:', error);
+    }
+  }
+
+  function showBreeds(breeds) {
+    const statusEl = document.getElementById('catalog-status');
+    if (breeds.length === 0) {
+      document.getElementById('catalog-grid').innerHTML = '';
+      statusEl.textContent = 'Каталог пуст. Загляните позже или свяжитесь с нами.';
+      statusEl.className = 'catalog-status empty';
+      fillBreedSelect(breeds);
+      return;
+    }
+    renderBreeds(breeds);
+    fillBreedSelect(breeds);
+    statusEl.textContent = '';
+    statusEl.className = 'catalog-status';
+  }
+
+  function showCachedBreedsStatus(timestamp, updateFailed = false) {
+    const statusEl = document.getElementById('catalog-status');
+    const savedAt = new Intl.DateTimeFormat('ru-RU', {
+      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    }).format(new Date(timestamp));
+    const staleLabel = Date.now() - timestamp > BREEDS_CACHE_TTL_MS
+      ? 'Кэш старше 48 часов и может быть устаревшим. ' : '';
+    const updateLabel = updateFailed ? 'Не удалось проверить обновления.' : 'Проверяем обновления.';
+    statusEl.textContent = `${staleLabel}Каталог сохранён ${savedAt}. ${updateLabel} Цены и наличие уточняйте перед заказом.`;
+    statusEl.className = 'catalog-status';
+  }
+
+  async function fetchBreeds() {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), BREEDS_FETCH_TIMEOUT_MS);
+    try {
+      const response = await fetch(BREEDS_API_URL, { cache: 'no-store', signal: controller.signal });
+      if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
+      return validateBreeds(await response.json());
+    } catch (error) {
+      if (error && error.name === 'AbortError') {
+        throw new Error('Истекло время ожидания каталога пород (10 секунд)');
+      }
+      throw error;
+    } finally {
+      window.clearTimeout(timeoutId);
+    }
+  }
+
   async function loadBreeds() {
     const statusEl = document.getElementById('catalog-status');
-    const gridEl = document.getElementById('catalog-grid');
-    statusEl.innerHTML = '';
-    gridEl.innerHTML = '';
-
-    statusEl.textContent = 'Загрузка каталога...';
-    statusEl.className = 'catalog-status loading';
+    const cached = readBreedsCache();
+    if (cached) {
+      showBreeds(cached.breeds);
+      showCachedBreedsStatus(cached.timestamp);
+    } else {
+      statusEl.innerHTML = '';
+      document.getElementById('catalog-grid').innerHTML = '';
+      statusEl.textContent = 'Загрузка каталога...';
+      statusEl.className = 'catalog-status loading';
+    }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/breeds`);
-      if (!response.ok) {
-        throw new Error(`Ошибка сервера: ${response.status}`);
-      }
-      const breeds = await response.json();
-      if (!Array.isArray(breeds) || breeds.length === 0) {
-        statusEl.textContent = 'Каталог пуст. Загляните позже или свяжитесь с нами.';
-        statusEl.className = 'catalog-status empty';
-        return;
-      }
-
-      renderBreeds(breeds);
-      fillBreedSelect(breeds);
-      statusEl.textContent = '';
-      statusEl.className = 'catalog-status';
+      const breeds = await fetchBreeds();
+      saveBreedsCache(breeds);
+      showBreeds(breeds);
     } catch (error) {
       console.error('Ошибка загрузки каталога:', error);
+      if (cached) {
+        showCachedBreedsStatus(cached.timestamp, true);
+        return;
+      }
       statusEl.className = 'catalog-status error';
       statusEl.innerHTML = `
         <p>Не удалось загрузить каталог. Проверьте подключение и попробуйте ещё раз.</p>
