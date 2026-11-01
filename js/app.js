@@ -181,6 +181,11 @@
     if (contact.phone) {
       document.getElementById('contact-phone').textContent = contact.phone;
       document.getElementById('contact-phone').setAttribute('href', contact.phoneHref || '#');
+      const offlineCall = document.getElementById('form-offline-call');
+      if (offlineCall) {
+        offlineCall.textContent = contact.phone;
+        offlineCall.setAttribute('href', contact.phoneHref || '#');
+      }
       if (footerPhone) {
         footerPhone.textContent = contact.phone;
         footerPhone.setAttribute('href', contact.phoneHref || '#');
@@ -389,6 +394,43 @@
   }
 
   // ---------- Форма заявки ----------
+  function setFormOfflineNotice(state) {
+    const notice = document.getElementById('form-offline-notice');
+    if (!notice) return;
+
+    const title = document.getElementById('form-offline-title');
+    const description = document.getElementById('form-offline-description');
+    if (state === 'uncertain') {
+      title.textContent = 'Не удалось подтвердить отправку. Заявка могла поступить.';
+      description.textContent = 'Перед повторной отправкой уточните статус по телефону: ';
+    } else {
+      title.textContent = 'Нет подключения к интернету. Заявку сейчас отправить нельзя.';
+      description.textContent = 'После восстановления связи отправьте форму повторно или позвоните в ферму: ';
+    }
+
+    notice.dataset.state = state;
+    notice.hidden = false;
+  }
+
+  function updateFormConnectionState() {
+    const consent = document.getElementById('consent');
+    const submitButton = document.querySelector('.btn-submit');
+    const notice = document.getElementById('form-offline-notice');
+    if (!consent || !submitButton || !notice) return;
+
+    const offline = navigator.onLine === false;
+    submitButton.disabled = !consent.checked || offline;
+
+    if (notice.dataset.state === 'uncertain') {
+      notice.hidden = false;
+    } else if (offline) {
+      setFormOfflineNotice('offline');
+    } else {
+      notice.hidden = true;
+      delete notice.dataset.state;
+    }
+  }
+
   async function handleFormSubmit(e) {
     e.preventDefault();
     clearFieldErrors();
@@ -397,6 +439,13 @@
     feedback.className = 'form-feedback';
 
     const form = e.target;
+    if (navigator.onLine === false) {
+      setFormOfflineNotice('offline');
+      feedback.textContent = 'Заявка не отправлена. После восстановления связи попробуйте ещё раз.';
+      feedback.className = 'form-feedback error';
+      return;
+    }
+
     const validation = validateForm(form);
 
     if (!validation.valid) {
@@ -416,7 +465,9 @@
     const turnstileInput = form.querySelector('input[name="cf-turnstile-response"]');
     const turnstileToken = turnstileInput ? turnstileInput.value.trim() : '';
     if (!turnstileToken) {
-      feedback.textContent = 'Пройдите проверку, что вы не робот';
+      feedback.textContent = window.turnstile
+        ? 'Пройдите проверку, что вы не робот.'
+        : 'Не удалось загрузить проверку безопасности. После восстановления связи обновите страницу.';
       feedback.className = 'form-feedback error';
       return;
     }
@@ -448,7 +499,9 @@
         } catch (parseError) {
           // ignore
         }
-        throw new Error(errorMessage);
+        const error = new Error(errorMessage);
+        error.status = response.status;
+        throw error;
       }
 
       const result = await response.json();
@@ -470,13 +523,25 @@
       successPanel.focus();
     } catch (error) {
       console.error('Ошибка отправки формы:', error);
-      feedback.textContent = error.message || 'Произошла ошибка. Попробуйте ещё раз.';
+      const outcomeUnknown = error instanceof TypeError || error instanceof SyntaxError || error.status >= 500;
+      if (outcomeUnknown) {
+        setFormOfflineNotice('uncertain');
+        feedback.textContent = 'Не удалось подтвердить результат отправки. Перед повторной отправкой уточните статус по телефону.';
+        if (window.turnstile && typeof window.turnstile.reset === 'function') {
+          window.turnstile.reset();
+        }
+      } else {
+        const notice = document.getElementById('form-offline-notice');
+        notice.hidden = true;
+        delete notice.dataset.state;
+        feedback.textContent = error.message || 'Произошла ошибка. Заявка не отправлена. Попробуйте ещё раз.';
+      }
       feedback.className = 'form-feedback error';
       // В случае ошибки не сбрасываем Turnstile, чтобы пользователь мог повторить без прохождения повторной проверки,
       // но токен мог быть использован, поэтому лучше тоже сбросить? Оставляем как есть: если ошибка серверная, токен может быть не израсходован.
       // При необходимости можно сбросить, но по ТЗ не требуется.
     } finally {
-      submitBtn.disabled = !document.getElementById('consent').checked;
+      updateFormConnectionState();
       submitBtn.textContent = 'Отправить заявку';
     }
   }
@@ -534,14 +599,13 @@
   function initPrivacyAndConsent() {
     const consent = document.getElementById('consent');
     const submitButton = document.querySelector('.btn-submit');
+    const offlineNotice = document.getElementById('form-offline-notice');
     const modal = document.getElementById('privacy-modal');
     const openLink = document.getElementById('privacy-policy-link');
     const closeButton = document.getElementById('privacy-modal-close');
-    if (!consent || !submitButton || !modal || !openLink || !closeButton) return;
+    if (!consent || !submitButton || !offlineNotice || !modal || !openLink || !closeButton) return;
 
-    const updateSubmitState = () => {
-      submitButton.disabled = !consent.checked;
-    };
+    const updateSubmitState = updateFormConnectionState;
     const closeModal = () => {
       modal.hidden = true;
     };
@@ -552,6 +616,8 @@
     };
 
     consent.addEventListener('change', updateSubmitState);
+    window.addEventListener('online', updateSubmitState);
+    window.addEventListener('offline', updateSubmitState);
     openLink.addEventListener('click', openModal);
     closeButton.addEventListener('click', closeModal);
     modal.addEventListener('click', event => {

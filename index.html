@@ -110,8 +110,12 @@
                         <div class="error-message" id="consent-error" aria-live="polite"></div>
                     </div>
                     <div id="form-feedback" class="form-feedback" role="status" aria-live="polite"></div>
+                    <div id="form-offline-notice" class="form-offline-notice" role="status" aria-live="polite" hidden>
+                        <p><strong id="form-offline-title">Нет подключения к интернету. Заявку сейчас отправить нельзя.</strong></p>
+                        <p><span id="form-offline-description">После восстановления связи отправьте форму повторно или позвоните в ферму: </span><a id="form-offline-call" href="tel:+79107920210">+7 (910) 792-02-10</a>.</p>
+                    </div>
                     <div class="cf-turnstile" data-sitekey="0x4AAAAAAEzDUbADTcyROmiz"></div>
-                    <button type="submit" class="btn btn-primary btn-submit">Отправить заявку</button>
+                    <button type="submit" class="btn btn-primary btn-submit" disabled>Отправить заявку</button>
                 </form>
                 <div id="application-success" class="application-success" role="status" aria-live="polite" tabindex="-1" hidden>
                     <h3>Спасибо! Ваша заявка принята.</h3>

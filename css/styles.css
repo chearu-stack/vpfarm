@@ -634,6 +634,32 @@ a:hover {
     color: var(--color-success);
 }
 
+.form-offline-notice {
+    margin: 16px 0;
+    padding: 12px 16px;
+    border: 1px solid rgba(72, 91, 63, 0.2);
+    border-left: 2px solid #71815d;
+    border-radius: 6px;
+    background: #f4f6f1;
+    color: #394336;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.form-offline-notice[hidden] {
+    display: none;
+}
+
+.form-offline-notice p + p {
+    margin-top: 4px;
+}
+
+.form-offline-notice a {
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
 /* ---------- Контакты ---------- */
 .contacts {
     background-color: var(--color-surface);
