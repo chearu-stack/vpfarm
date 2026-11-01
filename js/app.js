@@ -7,7 +7,6 @@
   const BREEDS_API_URL = `${API_BASE_URL}/api/breeds`;
   const BREEDS_CACHE_KEY = 'vpfarm_breeds_cache_v1';
   const BREEDS_CACHE_VERSION = 1;
-  const BREEDS_CACHE_TTL_MS = 48 * 60 * 60 * 1000;
   const BREEDS_FETCH_TIMEOUT_MS = 10000;
 
   // ---------- Утилиты ----------
@@ -275,16 +274,21 @@
     statusEl.className = 'catalog-status';
   }
 
-  function showCachedBreedsStatus(timestamp, updateFailed = false) {
+  function showCachedBreedsStatus(timestamp) {
     const statusEl = document.getElementById('catalog-status');
     const savedAt = new Intl.DateTimeFormat('ru-RU', {
       day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
     }).format(new Date(timestamp));
-    const staleLabel = Date.now() - timestamp > BREEDS_CACHE_TTL_MS
-      ? 'Кэш старше 48 часов и может быть устаревшим. ' : '';
-    const updateLabel = updateFailed ? 'Не удалось проверить обновления.' : 'Проверяем обновления.';
-    statusEl.textContent = `${staleLabel}Каталог сохранён ${savedAt}. ${updateLabel} Цены и наличие уточняйте перед заказом.`;
-    statusEl.className = 'catalog-status';
+    const message = document.createElement('p');
+    message.className = 'catalog-cache-notice-title';
+    message.textContent = `Проблемы с интернетом. Загружены данные от ${savedAt}.`;
+
+    const note = document.createElement('small');
+    note.className = 'catalog-cache-notice-note';
+    note.textContent = 'Без устойчивой связи интернет онлайн-заказ недоступен.';
+
+    statusEl.replaceChildren(message, note);
+    statusEl.className = 'catalog-status is-offline-cache';
   }
 
   async function fetchBreeds() {
@@ -309,7 +313,6 @@
     const cached = readBreedsCache();
     if (cached) {
       showBreeds(cached.breeds);
-      showCachedBreedsStatus(cached.timestamp);
     } else {
       statusEl.innerHTML = '';
       document.getElementById('catalog-grid').innerHTML = '';
@@ -324,7 +327,7 @@
     } catch (error) {
       console.error('Ошибка загрузки каталога:', error);
       if (cached) {
-        showCachedBreedsStatus(cached.timestamp, true);
+        showCachedBreedsStatus(cached.timestamp);
         return;
       }
       statusEl.className = 'catalog-status error';
