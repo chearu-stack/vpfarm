@@ -451,9 +451,7 @@
       const result = await response.json();
       console.log('Заявка успешно отправлена:', result);
 
-      // Успешная отправка
-      feedback.textContent = 'Заявка отправлена! Мы свяжемся с вами в ближайшее время.';
-      feedback.className = 'form-feedback success';
+      // Успешная отправка: заменяем форму подтверждением.
       form.reset();
       // Сбрасываем значения полей (браузер сбросит, но select может остаться)
       form.breed_id.value = '';
@@ -463,6 +461,10 @@
       if (window.turnstile && typeof window.turnstile.reset === 'function') {
         window.turnstile.reset();
       }
+      form.hidden = true;
+      const successPanel = document.getElementById('application-success');
+      successPanel.hidden = false;
+      successPanel.focus();
     } catch (error) {
       console.error('Ошибка отправки формы:', error);
       feedback.textContent = error.message || 'Произошла ошибка. Попробуйте ещё раз.';
@@ -575,6 +577,25 @@
     const form = document.getElementById('application-form');
     if (form) {
       form.addEventListener('submit', handleFormSubmit);
+    }
+
+    const successPanel = document.getElementById('application-success');
+    const newApplicationButton = document.getElementById('new-application');
+    if (form && successPanel && newApplicationButton) {
+      newApplicationButton.addEventListener('click', () => {
+        form.reset();
+        form.breed_id.value = '';
+        clearFieldErrors();
+        const feedback = document.getElementById('form-feedback');
+        feedback.textContent = '';
+        feedback.className = 'form-feedback';
+        if (window.turnstile && typeof window.turnstile.reset === 'function') {
+          window.turnstile.reset();
+        }
+        successPanel.hidden = true;
+        form.hidden = false;
+        document.getElementById('name').focus();
+      });
     }
   });
 })();
